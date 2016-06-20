@@ -3,25 +3,29 @@
 
 #include <stdint.h>
 
-#define FLAG_OPTATIVE 1<<1
-#define FLAG_REQUIRED 1<<2
-#define FLAG_POSITIONAL 1<<0
-
 #define TYPE_BOOL 0
 #define TYPE_INT 1
 #define TYPE_STRING 2
 #define TYPE_FLOAT 3
+#define TYPE_WFILE 4
 
 struct st_option {
-	const char flagshort;
+	const char  flagshort;
 	const char *flaglong;
 	const char *description;
 	const char *placeholder;
-	uint8_t flags;
 	uint8_t type;
 	void * data;
 	const char *def;
 };
+
+/*
+ * Use this macros to define the elements of the options structure
+ */
+#define FLAG_BOOL(flag, longflag, description, variable, default) {flag, longflag, description, NULL, TYPE_BOOL, variable, default}
+#define PARAM_INT(longflag, description, variable, default)       {'-',  longflag, description, NULL, TYPE_INT, variable, default}
+#define PARAM_STRING(longflag, description, variable, default)    {'-',  longflag, description, NULL, TYPE_STRING, variable, default}
+#define OPTIONS_END {}
 
 /*
  * Print a well formatted usage using the options structure. Also provide

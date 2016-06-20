@@ -20,74 +20,56 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "CreateDenseMatrixGeneral.h"
+#include "../utils/options.h"
 
 int CreateDenseMatrixGeneral(int argc, char *argv[]) {
-//Options: numRows numCols fileName seed
 
 	FILE *output;
-	//long nz;   
-	unsigned long int i, j;
+	unsigned long int numRows, numCols, seed, i, j;
+	char * outputpath;
+	double value;
 	MM_typecode outputmatcode;
-	
+
+	int verbose;
+	struct st_option options[] = {
+		FLAG_BOOL('v', "verbose", "Show more info when executing", &verbose, NULL),
+		PARAM_INT("rows", "Number of rows of the matrix", &numRows, NULL),
+		PARAM_INT("cols", "Number of columns of the matrix", &numCols, NULL),
+		PARAM_STRING("outputfilename", "Filename to write the matrix into", &outputpath, NULL),
+		PARAM_INT("seed", "Seed of the random number generator", &seed, "0"),
+		OPTIONS_END,
+	};
+
+	if (options_parse(options, argc, argv)) {
+		options_usage(options, "./MM-Suite CreateDenseMatrixGeneral");
+		puts(option_err_msg);
+		return 0;
+	};
+
+	if ((output = fopen(outputpath, "w")) == NULL){
+		return 0;
+	}
+
+
 	mm_initialize_typecode(&outputmatcode);
 	mm_set_matrix(&outputmatcode);
 	mm_set_coordinate(&outputmatcode);
-	//mm_set_dense(&outputmatcode);
 	mm_set_real(&outputmatcode);
 	mm_set_general(&outputmatcode);
-	
-	unsigned long int numRows = 0;
-	unsigned long int numCols = 0;
-	unsigned int seed = 0;
 
-	//double valor = 0.0;
-
-	//int ret_code;
-
-	if (argc < 5)
-	{
-		fprintf(stderr, "[%s] Usage: %s [num-rows] [num-cols] [output-filename] [seed]\n",__func__, argv[0]);
-		return 0;
-	}
-
-	if ((output = fopen(argv[3], "w")) == NULL){
-		return 0;
-	}
-			
-	numRows = atoi(argv[1]);
-	numCols = atoi(argv[2]);
-	seed = atoi(argv[4]);
-	
-	//unsigned long long int nnz = numRows*numCols;
-	
-	//double *values =  (double *) calloc(nnz,sizeof(double));
-	double value = 0.0;
-	
-	srand (seed);
+	srand(seed);
 
 	mm_write_banner(output, outputmatcode);
 	mm_write_mtx_crd_size(output, numRows, numCols, numRows*numCols);
-	//ret_code = fprintf(output,"\%\%MatrixMarket matrix coordinate real symmetric\n");
 	
-	//unsigned long long int val1 = 0;
-	//unsigned long long int val2 = 0;
-	
-
-	
-	for(i = 0;i < numRows; i++){
-	
-		for(j = 0; j< numCols; j++){
-
-			value = ((double)rand() / (double)RAND_MAX)/100;
-			fprintf(output, "%lu %lu %lg\n",i+1,j+1,value);
-
+	for (i = 0; i < numRows; i++) {
+		for (j = 0; j < numCols; j++) {
+			value = ((double) rand() / (double) RAND_MAX) / 100;
+			fprintf(output, "%lu %lu %lg\n", i + 1, j + 1, value);
 		}
-
 	}
 	
-
 	fclose(output);
 
 	return 1;
-}
-
+};
